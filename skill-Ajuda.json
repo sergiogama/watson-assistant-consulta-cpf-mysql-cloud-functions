@@ -1,0 +1,256 @@
+{
+  "intents": [],
+  "entities": [
+    {
+      "entity": "Dados_pessoais",
+      "values": [
+        {
+          "type": "patterns",
+          "value": "cpf",
+          "patterns": [
+            "([0-9]{3}[\\.]?[0-9]{3}[\\.]?[0-9]{3}[-]?[0-9]{2})"
+          ]
+        }
+      ],
+      "fuzzy_match": true
+    },
+    {
+      "entity": "sys-date",
+      "values": [],
+      "fuzzy_match": true
+    }
+  ],
+  "metadata": {
+    "api_version": {
+      "major_version": "v2",
+      "minor_version": "2018-11-08"
+    }
+  },
+  "webhooks": [
+    {
+      "url": "https://eu-de.functions.appdomain.cloud/api/v1/web/mwsadows%40us.ibm.com_dev-eu/default/GAMA-diaana-getClient.json",
+      "name": "main_webhook",
+      "headers": []
+    }
+  ],
+  "dialog_nodes": [
+    {
+      "type": "frame",
+      "title": "Bem-vindo",
+      "actions": [
+        {
+          "name": "main_webhook",
+          "type": "webhook",
+          "parameters": {
+            "cpf": "$cpf"
+          },
+          "result_variable": "resultado"
+        }
+      ],
+      "metadata": {
+        "_customization": {
+          "mcr": true
+        }
+      },
+      "next_step": {
+        "behavior": "jump_to",
+        "selector": "condition",
+        "dialog_node": "node_7_1624740815725"
+      },
+      "conditions": "welcome",
+      "dialog_node": "Bem-vindo"
+    },
+    {
+      "type": "standard",
+      "title": "Em outros casos",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "@sys-date.literal"
+              }
+            ],
+            "response_type": "text",
+            "selection_policy": "sequential"
+          }
+        ]
+      },
+      "conditions": "anything_else",
+      "dialog_node": "Em outros casos",
+      "previous_sibling": "node_8_1624740980873",
+      "disambiguation_opt_out": true
+    },
+    {
+      "type": "event_handler",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "Qual o seu CPF?"
+              }
+            ],
+            "response_type": "text",
+            "selection_policy": "sequential"
+          }
+        ]
+      },
+      "parent": "slot_5_1624661430398",
+      "event_name": "focus",
+      "dialog_node": "handler_10_1624661430406",
+      "previous_sibling": "handler_3_1624661430406"
+    },
+    {
+      "type": "event_handler",
+      "output": {},
+      "parent": "slot_5_1624661430398",
+      "context": {
+        "cpf": "@Dados_pessoais"
+      },
+      "conditions": "@Dados_pessoais",
+      "event_name": "input",
+      "dialog_node": "handler_3_1624661430406"
+    },
+    {
+      "type": "event_handler",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "Pesquisando os seus dados..."
+              }
+            ],
+            "response_type": "text"
+          }
+        ]
+      },
+      "parent": "slot_5_1624661430398",
+      "context": {
+        "cpf": "<? @Dados_pessoais.literal.getMatch('([\\d]+)',0) + @Dados_pessoais.literal.getMatch('([\\d]+)',1) +@Dados_pessoais.literal.getMatch('([\\d]+)',2) + @Dados_pessoais.literal.getMatch('([\\d]+)',3) ?>"
+      },
+      "conditions": "$cpf",
+      "event_name": "filled",
+      "dialog_node": "handler_8_1624739056050",
+      "previous_sibling": "handler_10_1624661430406"
+    },
+    {
+      "type": "standard",
+      "title": "Welcome!",
+      "output": {
+        "generic": []
+      },
+      "parent": "Bem-vindo",
+      "next_step": {
+        "behavior": "jump_to",
+        "selector": "body",
+        "dialog_node": "node_8_1624740980873"
+      },
+      "conditions": "anything_else",
+      "dialog_node": "node_2_1624741302189",
+      "previous_sibling": "node_7_1624740815725"
+    },
+    {
+      "type": "standard",
+      "title": "Cadastro",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "Não encontrei o seu registro. Gostaria de se registrar?"
+              }
+            ],
+            "response_type": "text",
+            "selection_policy": "sequential"
+          }
+        ]
+      },
+      "parent": "Bem-vindo",
+      "conditions": "$resultado.Erro",
+      "dialog_node": "node_7_1624740815725"
+    },
+    {
+      "type": "standard",
+      "title": "Início",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "Como posso te ajudar hoje?"
+              }
+            ],
+            "response_type": "text",
+            "selection_policy": "sequential"
+          }
+        ]
+      },
+      "conditions": "false",
+      "dialog_node": "node_8_1624740980873",
+      "previous_sibling": "Bem-vindo"
+    },
+    {
+      "type": "response_condition",
+      "output": {
+        "text": {
+          "values": [
+            "Olá $resultado.nome"
+          ],
+          "selection_policy": "sequential"
+        }
+      },
+      "parent": "Bem-vindo",
+      "conditions": "$resultado && !$resultado.Erro",
+      "dialog_node": "response_2_1624661520370",
+      "previous_sibling": "node_2_1624741302189"
+    },
+    {
+      "type": "response_condition",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "Desculpa! Serviço não disponível no momento!"
+              }
+            ],
+            "response_type": "text",
+            "selection_policy": "sequential"
+          }
+        ]
+      },
+      "parent": "Bem-vindo",
+      "conditions": "!$resultado.Erro",
+      "dialog_node": "response_7_1624740657430",
+      "previous_sibling": "response_2_1624661520370"
+    },
+    {
+      "type": "slot",
+      "output": {},
+      "parent": "Bem-vindo",
+      "variable": "$cpf",
+      "dialog_node": "slot_5_1624661430398",
+      "previous_sibling": "response_7_1624740657430"
+    }
+  ],
+  "counterexamples": [],
+  "system_settings": {
+    "disambiguation": {
+      "prompt": "Você quis dizer:",
+      "enabled": true,
+      "randomize": true,
+      "max_suggestions": 5,
+      "suggestion_text_policy": "title",
+      "none_of_the_above_prompt": "Nenhuma das anteriores"
+    },
+    "human_agent_assist": {
+      "prompt": "Você quis dizer:"
+    }
+  },
+  "learning_opt_out": false,
+  "name": "Ajuda",
+  "language": "pt-br",
+  "description": ""
+}
